@@ -78,27 +78,23 @@ const updateArticle = async (req, res, next) => {
 };
 
 const deleteArticle = async (req, res) => {
-  const { user } = req.body;
+  const blogId = req.params.blogId;
+  const bloggerId = req.query.bloggerId;
 
-  const id = req.params.id;
-
-  if (!id) return res.status(400);
-  let article;
-  article = await Article.findById(id);
-  const userId = article.user.toString();
-  if (userI === user) {
-    try {
-      article = await Article.findByIdAndRemove(id).populate("user");
-      await article.user.articles.pull(article);
-      await article.user.save();
-    } catch (err) {
-      return res.status(500).json({ message: "Error" });
+  try {
+    // Check if blog post exists
+    const blogPost = await Article.findOne({ _id: blogId, bloggerId });
+    if (!blogPost) {
+      return res.status(404).json({ error: "Blog post not found" });
     }
-  } else {
-    res.status(401).json({ message: "You can delete only your post!" });
-  }
 
-  res.status(200).json({ message: "Blog deleted successfully" });
+    // Delete the blog post
+    await Article.deleteOne({ _id: blogId, bloggerId });
+    res.json({ success: "Blog post deleted successfully" });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ error: "Server error" });
+  }
 };
 
 const getArticleById = async (req, res) => {
