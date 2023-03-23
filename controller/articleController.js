@@ -10,6 +10,7 @@ const getAllArticles = async (req, res) => {
 
 const createNewArticle = async (req, res) => {
   const { title, content, user } = req.body;
+
   if (!title || !content || !user) {
     return res
       .status(400)
@@ -27,7 +28,7 @@ const createNewArticle = async (req, res) => {
   if (!existingUser) {
     return res.status(400).json({ message: "User most be login" });
   }
-
+  console.log("user exist");
   const article = new Article({
     title,
     content,
@@ -47,34 +48,33 @@ const createNewArticle = async (req, res) => {
   return res.status(201);
 };
 
-const updateArticle = async (req, res) => {
+const updateArticle = async (req, res, next) => {
   const { title, content, user } = req.body;
-
-  const blogId = req.params.id;
+  const { bloggerId } = req.query;
+  const { blogId } = req.params;
 
   if (!title || !content || !user) {
     return res.status(400).json({ message: "Title and content are required" });
   }
-  if (!blogId) {
-    return res.status(400);
-  }
 
-  const article = await Article.findById(blogId);
-  const userId = article.user.toString();
-  if (userId === user) {
-    try {
-      const article = await Article.findByIdAndUpdate(blogId, {
-        title,
-        content,
+  try {
+    const updatedBlog = await Blog.findOneAndUpdate(
+      { _id: blogId, bloggerId: bloggerId },
+      { $set: req.body },
+      { new: true }
+    );
+
+    if (!updatedBlog) {
+      return res.status(404).json({
+        message: "Blog not found or you are not authorized to update it",
       });
-    } catch (err) {
-      return res.status(500).json({ message: "Unable to update article" });
     }
-  } else {
-    res.status(401).json({ message: "You can update only your post!" });
-  }
 
-  return res.status(200).json({ message: "Blog updated successfully!" });
+    return res.status(200).json({ message: "Blog updated successfully!" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server Error" });
+  }
 };
 
 const deleteArticle = async (req, res) => {
@@ -86,7 +86,7 @@ const deleteArticle = async (req, res) => {
   let article;
   article = await Article.findById(id);
   const userId = article.user.toString();
-  if (userId === user) {
+  if (userI === user) {
     try {
       article = await Article.findByIdAndRemove(id).populate("user");
       await article.user.articles.pull(article);
