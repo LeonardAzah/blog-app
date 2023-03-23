@@ -49,11 +49,11 @@ const createNewArticle = async (req, res) => {
 };
 
 const updateArticle = async (req, res, next) => {
-  const { title, content, user } = req.body;
+  const { title, content } = req.body;
   const { bloggerId } = req.query;
   const { blogId } = req.params;
 
-  if (!title || !content || !user) {
+  if (!title || !content) {
     return res.status(400).json({ message: "Title and content are required" });
   }
 
