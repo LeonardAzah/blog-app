@@ -14,4 +14,4 @@ start with “Bearer”.
    this request.
 8. /articles/:id patch request that updates an existing article. It takes body parameter (title,
    content, user) and the bloger id as request param. Also requires an access token
-9. /article/:id: delete request that takes body parameter
+9. /article/:id: delete request that takes and user id as request pram
