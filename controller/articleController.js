@@ -50,8 +50,8 @@ const createNewArticle = async (req, res) => {
 
 const updateArticle = async (req, res, next) => {
   const { title, content } = req.body;
-  const { bloggerId } = req.query;
-  const { blogId } = req.params;
+  const { userId } = req.query.userId;
+  const { Id } = req.params.Id;
 
   if (!title || !content) {
     return res.status(400).json({ message: "Title and content are required" });
@@ -59,7 +59,7 @@ const updateArticle = async (req, res, next) => {
 
   try {
     const updatedBlog = await Blog.findOneAndUpdate(
-      { _id: blogId, bloggerId: bloggerId },
+      { _id: Id, userId: userId },
       { $set: req.body },
       { new: true }
     );
@@ -78,18 +78,18 @@ const updateArticle = async (req, res, next) => {
 };
 
 const deleteArticle = async (req, res) => {
-  const blogId = req.params.blogId;
-  const bloggerId = req.query.bloggerId;
+  const Id = req.params.Id;
+  const userId = req.query.userId;
 
   try {
     // Check if blog post exists
-    const blogPost = await Article.findOne({ _id: blogId, bloggerId });
+    const blogPost = await Article.findOne({ _id: Id, userId });
     if (!blogPost) {
       return res.status(404).json({ error: "Blog post not found" });
     }
 
     // Delete the blog post
-    await Article.deleteOne({ _id: blogId, bloggerId });
+    await Article.deleteOne({ _id: Id, userId });
     res.json({ success: "Blog post deleted successfully" });
   } catch (err) {
     console.error(err.message);
