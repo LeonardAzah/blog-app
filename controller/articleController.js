@@ -9,9 +9,10 @@ const getAllArticles = async (req, res) => {
 };
 
 const createNewArticle = async (req, res) => {
-  const { title, content, user } = req.body;
+  const { title, content } = req.body;
+  const { user } = req.params;
 
-  if (!title || !content || !user) {
+  if (!title || !content) {
     return res
       .status(400)
       .json({ message: "Username, title and content are required" });
@@ -28,7 +29,6 @@ const createNewArticle = async (req, res) => {
   if (!existingUser) {
     return res.status(400).json({ message: "User most be login" });
   }
-  console.log("user exist");
   const article = new Article({
     title,
     content,
